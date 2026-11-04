@@ -1,0 +1,223 @@
+<%- include('../partials/header', { pageTitle: 'Admin Analytics Dashboard - CampusCare VFSTR', isDashboard: true }) %>
+
+<div class="dashboard-layout">
+  <%- include('../partials/sidebar') %>
+
+  <div class="dashboard-main">
+    <header class="dashboard-topbar">
+      <div style="display: flex; align-items: center;">
+        <button class="mobile-toggle" aria-label="Toggle navigation menu">
+          <i class="bi bi-list"></i>
+        </button>
+        <div class="topbar-title">
+          <h2>Campus Administration Console</h2>
+          <p>Analytics, Redressal Monitoring & Department Oversight</p>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <a href="/admin/reports" class="btn btn-outline btn-sm">
+          <i class="bi bi-file-earmark-bar-graph"></i> Reports & CSV
+        </a>
+        <a href="/admin/notifications" class="notif-bell" title="Alerts">
+          <i class="bi bi-bell"></i>
+          <% if (typeof unreadCount !== 'undefined' && unreadCount > 0) { %>
+            <span class="notif-badge"><%= unreadCount %></span>
+          <% } %>
+        </a>
+      </div>
+    </header>
+
+    <main class="dashboard-content">
+      <%- include('../partials/alerts') %>
+
+      <!-- Analytics Stats Cards Grid -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon primary">
+            <i class="bi bi-journal-check"></i>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value"><%= stats.totalComplaints %></div>
+            <div class="stat-label">Total Grievances</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon warning">
+            <i class="bi bi-hourglass-top"></i>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value"><%= stats.pending %></div>
+            <div class="stat-label">Pending Review</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon info">
+            <i class="bi bi-gear-fill"></i>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value"><%= stats.inProgress %></div>
+            <div class="stat-label">Under Action</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon success">
+            <i class="bi bi-check2-all"></i>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value"><%= stats.resolved + stats.closed %></div>
+            <div class="stat-label">Resolved / Closed</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Secondary Metrics: Students, Staff, Rating -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div style="background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">ENROLLED STUDENTS</div>
+            <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-main);"><%= stats.totalStudents %></div>
+          </div>
+          <i class="bi bi-people" style="font-size: 1.8rem; color: var(--primary);"></i>
+        </div>
+
+        <div style="background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">ACTIVE STAFF / FACULTY</div>
+            <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-main);"><%= stats.totalStaff %></div>
+          </div>
+          <i class="bi bi-person-badge" style="font-size: 1.8rem; color: var(--warning);"></i>
+        </div>
+
+        <div style="background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">AVG STUDENT RATING</div>
+            <div style="font-size: 1.5rem; font-weight: 700; color: #f59e0b;">
+              <%= stats.avgRating %> <span style="font-size: 1rem;">/ 5.0</span>
+            </div>
+          </div>
+          <i class="bi bi-star-fill" style="font-size: 1.8rem; color: #f59e0b;"></i>
+        </div>
+      </div>
+
+      <!-- Chart.js Visualization Grid -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3><i class="bi bi-bar-chart-fill" style="color: var(--primary);"></i> Department Grievance Distribution</h3>
+            <span style="font-size: 0.775rem; color: var(--text-muted);">Total vs Resolved</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="deptChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3><i class="bi bi-pie-chart-fill" style="color: var(--accent);"></i> Complaint Status Breakdown</h3>
+            <span style="font-size: 0.775rem; color: var(--text-muted);">Current Pipeline</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="statusChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Complaints Management Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="bi bi-clipboard2-check" style="color: var(--primary);"></i> Recent Grievances Requiring Supervision</h3>
+          <a href="/admin/complaints" class="btn btn-primary btn-sm">Manage All Grievances</a>
+        </div>
+        <div class="card-body" style="padding: 0;">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Student</th>
+                  <th>Title</th>
+                  <th>Department</th>
+                  <th>Assigned Staff</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (recentComplaints && recentComplaints.length > 0) { %>
+                  <% recentComplaints.forEach(complaint => { %>
+                    <tr>
+                      <td><strong><%= complaint.complaintId %></strong></td>
+                      <td>
+                        <div style="font-weight: 600;"><%= complaint.student ? complaint.student.fullName : 'N/A' %></div>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);"><%= complaint.student ? complaint.student.regNo : '' %></span>
+                      </td>
+                      <td>
+                        <a href="/admin/complaint/<%= complaint._id %>" style="font-weight: 600; color: var(--text-main);">
+                          <%= complaint.title %>
+                        </a>
+                      </td>
+                      <td><%= complaint.department ? complaint.department.code : 'Unassigned' %></td>
+                      <td>
+                        <% if (complaint.assignedStaff) { %>
+                          <span style="color: var(--text-main); font-weight: 500;"><%= complaint.assignedStaff.fullName %></span>
+                        <% } else { %>
+                          <span style="color: var(--danger); font-style: italic; font-size: 0.8rem;">Unassigned</span>
+                        <% } %>
+                      </td>
+                      <td>
+                        <% if (complaint.priority === 'URGENT') { %>
+                          <span class="badge badge-urgent">URGENT</span>
+                        <% } else if (complaint.priority === 'HIGH') { %>
+                          <span class="badge badge-high">HIGH</span>
+                        <% } else if (complaint.priority === 'MEDIUM') { %>
+                          <span class="badge badge-medium">MEDIUM</span>
+                        <% } else { %>
+                          <span class="badge badge-low">LOW</span>
+                        <% } %>
+                      </td>
+                      <td>
+                        <%- include('../partials/statusBadge', { status: complaint.status }) %>
+                      </td>
+                      <td>
+                        <a href="/admin/complaint/<%= complaint._id %>" class="btn btn-outline-primary btn-sm">
+                          <i class="bi bi-sliders"></i> Manage
+                        </a>
+                      </td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="8" style="text-align: center; padding: 2.5rem 1rem; color: var(--text-muted);">
+                      No grievances logged in the system.
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Inject dynamic MongoDB aggregate analytics into Chart.js
+    const chartData = {
+      departments: <%- JSON.stringify(departmentStats || []) %>,
+      statuses: <%- JSON.stringify(statusBreakdown || []) %>
+    };
+    if (window.initDashboardCharts) {
+      window.initDashboardCharts(chartData);
+    }
+  });
+</script>
+
+<%- include('../partials/footer', { isDashboard: true }) %>
+

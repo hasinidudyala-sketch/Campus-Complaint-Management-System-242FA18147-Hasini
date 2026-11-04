@@ -1,0 +1,117 @@
+<%- include('../partials/header', { pageTitle: 'Student Registration - CampusCare VFSTR', isAuthPage: true, isDashboard: false }) %>
+
+<div class="auth-wrapper">
+  <div class="auth-card wide">
+    <div class="auth-header">
+      <a href="/">
+        <img src="/images/logo.svg" alt="CampusCare Logo">
+      </a>
+      <h2>Student Registration</h2>
+      <p>Create your official student account for grievance redressal</p>
+    </div>
+
+    <div class="auth-body">
+      <%- include('../partials/alerts') %>
+
+      <form action="/auth/register" method="POST">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="fullName">Full Name <span class="required">*</span></label>
+            <div class="input-with-icon">
+              <i class="bi bi-person icon-prefix"></i>
+              <input type="text" id="fullName" name="fullName" class="form-control" placeholder="e.g. Bhavya Sri" required autofocus>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="regNo">Registration / Roll No</label>
+            <div class="input-with-icon">
+              <i class="bi bi-card-text icon-prefix"></i>
+              <input type="text" id="regNo" name="regNo" class="form-control" placeholder="e.g. 231FA04001 (Optional)" style="text-transform: uppercase;">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="email">Email Address (Personal or College) <span class="required">*</span></label>
+            <div class="input-with-icon">
+              <i class="bi bi-envelope icon-prefix"></i>
+              <input type="email" id="email" name="email" class="form-control" placeholder="e.g. yourname@gmail.com" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="phone">Phone / Mobile Number</label>
+            <div class="input-with-icon">
+              <i class="bi bi-telephone icon-prefix"></i>
+              <input type="tel" id="phone" name="phone" class="form-control" placeholder="+91 98480 12345 (Optional)">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="department">Academic Department</label>
+          <div class="input-with-icon">
+            <i class="bi bi-building icon-prefix"></i>
+            <select id="department" name="department" class="form-select" style="padding-left: 2.75rem;">
+              <option value="General" selected>General / Other</option>
+              <% if (departments && departments.length > 0) { %>
+                <% departments.forEach(dept => { %>
+                  <option value="<%= dept.name %>"><%= dept.name %> (<%= dept.code %>)</option>
+                <% }) %>
+              <% } else { %>
+                <option value="Computer Science & Engineering">Computer Science & Engineering</option>
+                <option value="Electronics & Communication">Electronics & Communication</option>
+                <option value="Mechanical Engineering">Mechanical Engineering</option>
+                <option value="Civil Engineering">Civil Engineering</option>
+              <% } %>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="password">Create Password <span class="required">*</span></label>
+            <div class="input-with-icon">
+              <i class="bi bi-lock icon-prefix"></i>
+              <input type="password" id="password" name="password" class="form-control" placeholder="Min 6 characters" required minlength="6">
+              <button type="button" class="toggle-password" data-target="password">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="confirmPassword">Confirm Password <span class="required">*</span></label>
+            <div class="input-with-icon">
+              <i class="bi bi-shield-check icon-prefix"></i>
+              <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" placeholder="Re-enter password" required minlength="6">
+              <button type="button" class="toggle-password" data-target="confirmPassword">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+          <i class="bi bi-info-circle"></i> Public student registration only creates verified <strong>Student</strong> accounts. Faculty and Administrative accounts are provisioned securely by the Campus Administrator.
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg">
+          <i class="bi bi-person-check-fill"></i> Register Student Account
+        </button>
+      </form>
+    </div>
+
+    <div class="auth-footer">
+      <span>Already have a student account? <a href="/auth/login">Sign In here</a></span>
+      <div style="margin-top: 0.5rem;">
+        <a href="/" style="font-size: 0.825rem; color: var(--text-muted);"><i class="bi bi-arrow-left"></i> Return to Campus Homepage</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer', { isDashboard: false }) %>
+
