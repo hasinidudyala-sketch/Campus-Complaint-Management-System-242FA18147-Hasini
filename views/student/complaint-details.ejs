@@ -1,0 +1,218 @@
+<%- include('../partials/header', { pageTitle: `Grievance #${complaint.complaintId} - CampusCare VFSTR`, isDashboard: true }) %>
+
+<div class="dashboard-layout">
+  <%- include('../partials/sidebar') %>
+
+  <div class="dashboard-main">
+    <header class="dashboard-topbar">
+      <div style="display: flex; align-items: center;">
+        <button class="mobile-toggle" aria-label="Toggle navigation menu">
+          <i class="bi bi-list"></i>
+        </button>
+        <div class="topbar-title">
+          <h2>Grievance Details</h2>
+          <p>Tracking ID: <%= complaint.complaintId %></p>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <a href="/student/complaints" class="btn btn-outline btn-sm">
+          <i class="bi bi-arrow-left"></i> Back to Complaints
+        </a>
+      </div>
+    </header>
+
+    <main class="dashboard-content" style="max-width: 1040px;">
+      <%- include('../partials/alerts') %>
+
+      <!-- Top Header Card -->
+      <div class="card" style="margin-bottom: 1.75rem; border-top: 4px solid var(--primary);">
+        <div class="card-header" style="flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.35rem;">
+              <span style="font-weight: 700; color: var(--primary); font-size: 0.85rem;"><%= complaint.complaintId %></span>
+              <span style="color: var(--border-color);">•</span>
+              <span style="font-size: 0.85rem; color: var(--text-muted);"><%= complaint.category %></span>
+            </div>
+            <h1 style="font-size: 1.5rem; margin: 0;"><%= complaint.title %></h1>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <% if (complaint.priority === 'URGENT') { %>
+              <span class="badge badge-urgent">URGENT</span>
+            <% } else if (complaint.priority === 'HIGH') { %>
+              <span class="badge badge-high">HIGH</span>
+            <% } else if (complaint.priority === 'MEDIUM') { %>
+              <span class="badge badge-medium">MEDIUM</span>
+            <% } else { %>
+              <span class="badge badge-low">LOW</span>
+            <% } %>
+            <%- include('../partials/statusBadge', { status: complaint.status }) %>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; background-color: var(--secondary-light); padding: 1.25rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+            <div>
+              <span class="form-hint" style="display: block;">Department</span>
+              <strong style="color: var(--text-main);"><%= complaint.department ? complaint.department.name : 'General / Central Office' %></strong>
+            </div>
+            <div>
+              <span class="form-hint" style="display: block;">Assigned Staff</span>
+              <strong style="color: var(--text-main);"><%= complaint.assignedStaff ? complaint.assignedStaff.fullName : 'Awaiting Assignment' %></strong>
+            </div>
+            <div>
+              <span class="form-hint" style="display: block;">Date Submitted</span>
+              <strong style="color: var(--text-main);"><%= new Date(complaint.createdAt).toLocaleString() %></strong>
+            </div>
+            <div>
+              <span class="form-hint" style="display: block;">Resolved Date</span>
+              <strong style="color: var(--text-main);"><%= complaint.resolvedDate ? new Date(complaint.resolvedDate).toLocaleString() : 'In Progress / Open' %></strong>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div style="margin-bottom: 2rem;">
+            <h4 style="font-size: 1.05rem; margin-bottom: 0.5rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Detailed Description</h4>
+            <div style="background-color: #ffffff; border: 1px solid var(--border-color); padding: 1.25rem; border-radius: var(--radius-md); line-height: 1.7; font-size: 0.95rem; white-space: pre-wrap;"><%= complaint.description %></div>
+          </div>
+
+          <!-- Attachments -->
+          <% if (complaint.attachments && complaint.attachments.length > 0) { %>
+            <div style="margin-bottom: 2rem;">
+              <h4 style="font-size: 1.05rem; margin-bottom: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
+                <i class="bi bi-paperclip"></i> Supporting Attachments (<%= complaint.attachments.length %>)
+              </h4>
+              <div style="display: flex; flex-wrap: wrap; gap: 0.85rem;">
+                <% complaint.attachments.forEach(file => { %>
+                  <a href="<%= file.path %>" target="_blank" download class="btn btn-outline" style="text-align: left; padding: 0.6rem 1rem;">
+                    <% if (file.mimetype.includes('pdf')) { %>
+                      <i class="bi bi-file-earmark-pdf-fill" style="color: #ef4444; font-size: 1.25rem;"></i>
+                    <% } else { %>
+                      <i class="bi bi-file-earmark-image-fill" style="color: #3b82f6; font-size: 1.25rem;"></i>
+                    <% } %>
+                    <div>
+                      <div style="font-size: 0.85rem; font-weight: 600;"><%= file.originalname %></div>
+                      <div style="font-size: 0.725rem; color: var(--text-muted);"><%= (file.size / 1024).toFixed(1) %> KB • View / Download</div>
+                    </div>
+                  </a>
+                <% }) %>
+              </div>
+            </div>
+          <% } %>
+
+          <!-- Official Remarks / Resolution Box -->
+          <% if (complaint.staffRemarks || complaint.adminRemarks || complaint.resolutionDetails) { %>
+            <div style="margin-bottom: 2rem; background-color: var(--primary-light); border: 1px solid #bfdbfe; border-radius: var(--radius-md); padding: 1.25rem;">
+              <h4 style="font-size: 1rem; color: #1e3a8a; margin-bottom: 0.75rem;">
+                <i class="bi bi-shield-check"></i> Redressal Committee Remarks & Resolution
+              </h4>
+
+              <% if (complaint.resolutionDetails) { %>
+                <div style="margin-bottom: 0.75rem;">
+                  <strong style="font-size: 0.85rem; color: #1e40af;">Action Taken / Resolution:</strong>
+                  <p style="margin: 0.2rem 0 0; color: #1e3a8a;"><%= complaint.resolutionDetails %></p>
+                </div>
+              <% } %>
+
+              <% if (complaint.staffRemarks) { %>
+                <div style="margin-bottom: 0.75rem;">
+                  <strong style="font-size: 0.85rem; color: #1e40af;">Staff Remarks:</strong>
+                  <p style="margin: 0.2rem 0 0; color: #1e3a8a;"><%= complaint.staffRemarks %></p>
+                </div>
+              <% } %>
+
+              <% if (complaint.adminRemarks) { %>
+                <div>
+                  <strong style="font-size: 0.85rem; color: #1e40af;">Administrative Directive:</strong>
+                  <p style="margin: 0.2rem 0 0; color: #1e3a8a;"><%= complaint.adminRemarks %></p>
+                </div>
+              <% } %>
+            </div>
+          <% } %>
+
+          <!-- Timeline -->
+          <h4 style="font-size: 1.05rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+            <i class="bi bi-clock-history"></i> Status Audit Timeline
+          </h4>
+          <div class="timeline">
+            <% if (complaint.statusHistory && complaint.statusHistory.length > 0) { %>
+              <% complaint.statusHistory.forEach((hist, idx) => { %>
+                <div class="timeline-item">
+                  <div class="timeline-marker <%= hist.status === 'RESOLVED' || hist.status === 'CLOSED' ? 'resolved' : (idx === complaint.statusHistory.length - 1 ? 'active' : '') %>"></div>
+                  <div class="timeline-content">
+                    <div class="timeline-header">
+                      <span class="timeline-title"><%= hist.status %></span>
+                      <span class="timeline-date"><%= new Date(hist.timestamp).toLocaleString() %></span>
+                    </div>
+                    <% if (hist.updatedBy) { %>
+                      <div class="timeline-user">Updated by: <%= hist.updatedBy.fullName %> (<%= hist.updatedBy.designation || hist.updatedBy.role %>)</div>
+                    <% } %>
+                    <% if (hist.remarks) { %>
+                      <div class="timeline-remark"><%= hist.remarks %></div>
+                    <% } %>
+                  </div>
+                </div>
+              <% }) %>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feedback Section (Accessible when complaint is RESOLVED or CLOSED) -->
+      <% if (complaint.status === 'RESOLVED' || complaint.status === 'CLOSED') { %>
+        <div class="card" style="border-top: 4px solid var(--success);">
+          <div class="card-header">
+            <h3><i class="bi bi-star-fill" style="color: var(--warning);"></i> Resolution Feedback</h3>
+          </div>
+          <div class="card-body">
+            <% if (feedback) { %>
+              <!-- Display Submitted Feedback -->
+              <div style="background-color: var(--success-light); border: 1px solid #a7f3d0; padding: 1.5rem; border-radius: var(--radius-md);">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                  <span style="font-weight: 700; color: #065f46;">Your Rating:</span>
+                  <div style="color: #f59e0b;">
+                    <% for (let i = 1; i <= 5; i++) { %>
+                      <i class="bi <%= i <= feedback.rating ? 'bi-star-fill' : 'bi-star' %>"></i>
+                    <% } %>
+                  </div>
+                  <span style="font-weight: 600; color: #065f46;">(<%= feedback.rating %>/5)</span>
+                </div>
+                <p style="color: #065f46; margin: 0; line-height: 1.6;"><%= feedback.description %></p>
+                <div style="font-size: 0.775rem; color: #047857; margin-top: 0.5rem;">Submitted on: <%= new Date(feedback.createdAt).toLocaleString() %></div>
+              </div>
+            <% } else { %>
+              <!-- Feedback Submission Form -->
+              <p style="color: var(--text-muted); margin-bottom: 1.25rem;">
+                Your grievance has been marked as <strong>RESOLVED</strong>. Please provide your rating and comments regarding the resolution quality.
+              </p>
+              <form action="/student/complaint/<%= complaint._id %>/feedback" method="POST">
+                <div class="form-group">
+                  <label class="form-label">How satisfied are you with the resolution? <span class="required">*</span></label>
+                  <div class="star-rating">
+                    <input type="radio" id="star5" name="rating" value="5" required /><label for="star5" title="5 stars"><i class="bi bi-star-fill"></i></label>
+                    <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 stars"><i class="bi bi-star-fill"></i></label>
+                    <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 stars"><i class="bi bi-star-fill"></i></label>
+                    <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 stars"><i class="bi bi-star-fill"></i></label>
+                    <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 star"><i class="bi bi-star-fill"></i></label>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="feedbackDesc">Comments / Feedback Description <span class="required">*</span></label>
+                  <textarea id="feedbackDesc" name="description" rows="3" class="form-control" placeholder="Share your experience with the resolution provided..." required minlength="5"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                  <i class="bi bi-check-circle"></i> Submit Feedback
+                </button>
+              </form>
+            <% } %>
+          </div>
+        </div>
+      <% } %>
+    </main>
+  </div>
+</div>
+
+<%- include('../partials/footer', { isDashboard: true }) %>
+

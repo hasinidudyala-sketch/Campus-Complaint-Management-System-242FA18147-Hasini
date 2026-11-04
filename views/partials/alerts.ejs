@@ -1,0 +1,20 @@
+<% if (typeof success_msg !== 'undefined' && success_msg && success_msg.length > 0) { %>
+  <div class="alert alert-success" role="alert">
+    <div class="alert-content">
+      <i class="bi bi-check-circle-fill"></i>
+      <span><%= success_msg %></span>
+    </div>
+    <button type="button" class="alert-close" aria-label="Close">&times;</button>
+  </div>
+<% } %>
+
+<% if (typeof error_msg !== 'undefined' && error_msg && error_msg.length > 0) { %>
+  <div class="alert alert-danger" role="alert">
+    <div class="alert-content">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <span><%= error_msg %></span>
+    </div>
+    <button type="button" class="alert-close" aria-label="Close">&times;</button>
+  </div>
+<% } %>
+

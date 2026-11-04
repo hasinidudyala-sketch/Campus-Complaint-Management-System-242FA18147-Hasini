@@ -1,0 +1,12 @@
+node_modules/
+.env
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+public/uploads/complaints/*
+!public/uploads/complaints/.gitkeep
+public/uploads/profiles/*
+!public/uploads/profiles/.gitkeep
+.DS_Store
+Thumbs.db
+
