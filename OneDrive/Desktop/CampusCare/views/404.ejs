@@ -1,0 +1,19 @@
+<%- include('partials/header', { pageTitle: '404 - Page Not Found | CampusCare VFSTR', isDashboard: false }) %>
+<%- include('partials/navbar') %>
+
+<main class="main-content" style="padding: 5rem 0; text-align: center;">
+  <div class="container" style="max-width: 600px;">
+    <div style="font-size: 6rem; font-weight: 800; color: var(--primary); font-family: var(--font-heading); line-height: 1;">404</div>
+    <h2 style="font-size: 2rem; margin: 1rem 0;">Page Not Found</h2>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 2rem;">
+      The page or resource you are looking for at <code><%= path || '' %></code> does not exist or has been relocated.
+    </p>
+    <div style="display: flex; justify-content: center; gap: 1rem;">
+      <a href="/" class="btn btn-primary"><i class="bi bi-house-door"></i> Return Home</a>
+      <a href="/track" class="btn btn-outline"><i class="bi bi-search"></i> Track Grievance</a>
+    </div>
+  </div>
+</main>
+
+<%- include('partials/footer', { isDashboard: false }) %>
+

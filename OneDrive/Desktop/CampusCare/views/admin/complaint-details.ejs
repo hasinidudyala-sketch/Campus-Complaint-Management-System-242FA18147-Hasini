@@ -1,0 +1,253 @@
+<%- include('../partials/header', { pageTitle: `Manage Grievance #${complaint.complaintId} - CampusCare VFSTR`, isDashboard: true }) %>
+
+<div class="dashboard-layout">
+  <%- include('../partials/sidebar') %>
+
+  <div class="dashboard-main">
+    <header class="dashboard-topbar">
+      <div style="display: flex; align-items: center;">
+        <button class="mobile-toggle" aria-label="Toggle navigation menu">
+          <i class="bi bi-list"></i>
+        </button>
+        <div class="topbar-title">
+          <h2>Administrative Oversight & Delegation</h2>
+          <p>ID: <%= complaint.complaintId %> • Registered: <%= new Date(complaint.createdAt).toLocaleDateString() %></p>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <a href="/admin/complaints" class="btn btn-outline btn-sm">
+          <i class="bi bi-arrow-left"></i> All Grievances
+        </a>
+      </div>
+    </header>
+
+    <main class="dashboard-content" style="max-width: 1040px;">
+      <%- include('../partials/alerts') %>
+
+      <!-- Master Overview Card -->
+      <div class="card" style="margin-bottom: 2rem; border-top: 4px solid var(--primary);">
+        <div class="card-header" style="flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.35rem;">
+              <span style="font-weight: 700; color: var(--primary); font-size: 0.85rem;"><%= complaint.complaintId %></span>
+              <span style="color: var(--border-color);">•</span>
+              <span style="font-size: 0.85rem; color: var(--text-muted);"><%= complaint.category %></span>
+            </div>
+            <h1 style="font-size: 1.5rem; margin: 0;"><%= complaint.title %></h1>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <% if (complaint.priority === 'URGENT') { %>
+              <span class="badge badge-urgent">URGENT</span>
+            <% } else if (complaint.priority === 'HIGH') { %>
+              <span class="badge badge-high">HIGH</span>
+            <% } else if (complaint.priority === 'MEDIUM') { %>
+              <span class="badge badge-medium">MEDIUM</span>
+            <% } else { %>
+              <span class="badge badge-low">LOW</span>
+            <% } %>
+            <%- include('../partials/statusBadge', { status: complaint.status }) %>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; background-color: var(--secondary-light); padding: 1.25rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+            <div>
+              <span class="form-hint" style="display: block;">Student Name</span>
+              <strong style="color: var(--text-main); font-size: 1rem;"><%= complaint.student ? complaint.student.fullName : 'N/A' %></strong>
+              <div style="font-size: 0.8rem; color: var(--text-muted);"><%= complaint.student ? complaint.student.regNo : '' %> (<%= complaint.student ? complaint.student.department : '' %>)</div>
+            </div>
+            <div>
+              <span class="form-hint" style="display: block;">Student Contact</span>
+              <strong style="color: var(--text-main);"><%= complaint.student ? complaint.student.phone : 'N/A' %></strong>
+              <div style="font-size: 0.8rem; color: var(--text-muted);"><%= complaint.student ? complaint.student.email : '' %></div>
+            </div>
+            <div>
+              <span class="form-hint" style="display: block;">Assigned Department</span>
+              <strong style="color: var(--text-main);"><%= complaint.department ? complaint.department.name : 'Unassigned' %></strong>
+            </div>
+            <div>
+              <span class="form-hint" style="display: block;">Assigned Staff Member</span>
+              <strong style="color: var(--text-main);"><%= complaint.assignedStaff ? complaint.assignedStaff.fullName : 'Unassigned' %></strong>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div style="margin-bottom: 2rem;">
+            <h4 style="font-size: 1.05rem; margin-bottom: 0.5rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Student Description</h4>
+            <div style="background-color: #ffffff; border: 1px solid var(--border-color); padding: 1.25rem; border-radius: var(--radius-md); line-height: 1.7; font-size: 0.95rem; white-space: pre-wrap;"><%= complaint.description %></div>
+          </div>
+
+          <!-- Attachments -->
+          <% if (complaint.attachments && complaint.attachments.length > 0) { %>
+            <div style="margin-bottom: 2rem;">
+              <h4 style="font-size: 1.05rem; margin-bottom: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
+                <i class="bi bi-paperclip"></i> Uploaded Documents / Attachments (<%= complaint.attachments.length %>)
+              </h4>
+              <div style="display: flex; flex-wrap: wrap; gap: 0.85rem;">
+                <% complaint.attachments.forEach(file => { %>
+                  <a href="<%= file.path %>" target="_blank" download class="btn btn-outline" style="text-align: left; padding: 0.6rem 1rem;">
+                    <% if (file.mimetype.includes('pdf')) { %>
+                      <i class="bi bi-file-earmark-pdf-fill" style="color: #ef4444; font-size: 1.25rem;"></i>
+                    <% } else { %>
+                      <i class="bi bi-file-earmark-image-fill" style="color: #3b82f6; font-size: 1.25rem;"></i>
+                    <% } %>
+                    <div>
+                      <div style="font-size: 0.85rem; font-weight: 600;"><%= file.originalname %></div>
+                      <div style="font-size: 0.725rem; color: var(--text-muted);"><%= (file.size / 1024).toFixed(1) %> KB • View / Download</div>
+                    </div>
+                  </a>
+                <% }) %>
+              </div>
+            </div>
+          <% } %>
+
+          <!-- Staff Remarks & Resolution if present -->
+          <% if (complaint.staffRemarks || complaint.resolutionDetails) { %>
+            <div style="background-color: var(--primary-light); border: 1px solid #bfdbfe; border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 2rem;">
+              <h4 style="font-size: 1rem; color: #1e3a8a; margin-bottom: 0.5rem;"><i class="bi bi-person-badge"></i> Assigned Staff Updates</h4>
+              <% if (complaint.staffRemarks) { %>
+                <p style="margin: 0 0 0.5rem; color: #1e3a8a;"><strong>Staff Remarks:</strong> <%= complaint.staffRemarks %></p>
+              <% } %>
+              <% if (complaint.resolutionDetails) { %>
+                <p style="margin: 0; color: #1e3a8a;"><strong>Resolution Report:</strong> <%= complaint.resolutionDetails %></p>
+              <% } %>
+            </div>
+          <% } %>
+
+          <!-- Student Feedback if present -->
+          <% if (feedback) { %>
+            <div style="background-color: var(--success-light); border: 1px solid #a7f3d0; border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 2rem;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
+                <h4 style="font-size: 1rem; color: #065f46; margin: 0;"><i class="bi bi-star-fill" style="color: #f59e0b;"></i> Student Feedback</h4>
+                <div style="color: #f59e0b; font-weight: 700;">
+                  <% for (let i = 1; i <= 5; i++) { %>
+                    <i class="bi <%= i <= feedback.rating ? 'bi-star-fill' : 'bi-star' %>"></i>
+                  <% } %>
+                  (<%= feedback.rating %>/5)
+                </div>
+              </div>
+              <p style="color: #065f46; margin: 0;"><%= feedback.description %></p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Action Panel: Delegation & Priority -->
+      <div style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 1.75rem; margin-bottom: 2rem;">
+        <!-- Assign Department & Staff -->
+        <div class="card" style="border-top: 4px solid var(--primary);">
+          <div class="card-header">
+            <h3><i class="bi bi-person-plus-fill" style="color: var(--primary);"></i> Assign Staff & Priority</h3>
+          </div>
+          <div class="card-body">
+            <form action="/admin/complaint/<%= complaint._id %>/assign" method="POST">
+              <div class="form-group">
+                <label class="form-label" for="departmentId">Assign Department</label>
+                <select id="departmentId" name="departmentId" class="form-select">
+                  <option value="">General / Central Admin</option>
+                  <% departments.forEach(dept => { %>
+                    <option value="<%= dept._id %>" <%= (complaint.department && complaint.department._id.toString() === dept._id.toString()) ? 'selected' : '' %>>
+                      <%= dept.name %> (<%= dept.code %>)
+                    </option>
+                  <% }) %>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="staffId">Assign Staff Member</label>
+                <select id="staffId" name="staffId" class="form-select">
+                  <option value="">Select Staff Member...</option>
+                  <% staffMembers.forEach(staff => { %>
+                    <option value="<%= staff._id %>" <%= (complaint.assignedStaff && complaint.assignedStaff._id.toString() === staff._id.toString()) ? 'selected' : '' %>>
+                      <%= staff.fullName %> - <%= staff.department %> (<%= staff.designation %>)
+                    </option>
+                  <% }) %>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="priority">Grievance Priority</label>
+                <select id="priority" name="priority" class="form-select">
+                  <% priorities.forEach(p => { %>
+                    <option value="<%= p %>" <%= complaint.priority === p ? 'selected' : '' %>><%= p %></option>
+                  <% }) %>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="adminRemarks">Admin Instructions</label>
+                <textarea id="adminRemarks" name="adminRemarks" rows="2" class="form-control" placeholder="Directives for assigned staff..."><%= complaint.adminRemarks || '' %></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block">
+                <i class="bi bi-check-circle"></i> Save Assignment
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Direct Status Control -->
+        <div class="card" style="border-top: 4px solid var(--warning);">
+          <div class="card-header">
+            <h3><i class="bi bi-arrow-repeat" style="color: var(--warning);"></i> Override Status</h3>
+          </div>
+          <div class="card-body">
+            <form action="/admin/complaint/<%= complaint._id %>/update-status" method="POST">
+              <div class="form-group">
+                <label class="form-label" for="statusOverride">Current Pipeline Status</label>
+                <select id="statusOverride" name="status" class="form-select">
+                  <% statuses.forEach(st => { %>
+                    <option value="<%= st %>" <%= complaint.status === st ? 'selected' : '' %>><%= st %></option>
+                  <% }) %>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="overrideRemarks">Status Change Note</label>
+                <textarea id="overrideRemarks" name="adminRemarks" rows="4" class="form-control" placeholder="Reason for status change (e.g. Verified resolution, Reopened on appeal, Closed)..."></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-warning btn-block" style="color: #78350f; font-weight: 700;">
+                <i class="bi bi-arrow-clockwise"></i> Update Status
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audit History -->
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="bi bi-clock-history"></i> Complete Status Audit Trail</h3>
+        </div>
+        <div class="card-body">
+          <div class="timeline">
+            <% if (complaint.statusHistory && complaint.statusHistory.length > 0) { %>
+              <% complaint.statusHistory.forEach((hist, idx) => { %>
+                <div class="timeline-item">
+                  <div class="timeline-marker <%= hist.status === 'RESOLVED' || hist.status === 'CLOSED' ? 'resolved' : (idx === complaint.statusHistory.length - 1 ? 'active' : '') %>"></div>
+                  <div class="timeline-content">
+                    <div class="timeline-header">
+                      <span class="timeline-title"><%= hist.status %></span>
+                      <span class="timeline-date"><%= new Date(hist.timestamp).toLocaleString() %></span>
+                    </div>
+                    <% if (hist.updatedBy) { %>
+                      <div class="timeline-user">Updated by: <%= hist.updatedBy.fullName %> (<%= hist.updatedBy.designation || hist.updatedBy.role %>)</div>
+                    <% } %>
+                    <% if (hist.remarks) { %>
+                      <div class="timeline-remark"><%= hist.remarks %></div>
+                    <% } %>
+                  </div>
+                </div>
+              <% }) %>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<%- include('../partials/footer', { isDashboard: true }) %>
+

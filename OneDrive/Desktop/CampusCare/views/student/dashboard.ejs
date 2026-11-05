@@ -1,0 +1,178 @@
+<%- include('../partials/header', { pageTitle: 'Student Dashboard - CampusCare VFSTR', isDashboard: true }) %>
+
+<div class="dashboard-layout">
+  <%- include('../partials/sidebar') %>
+
+  <div class="dashboard-main">
+    <header class="dashboard-topbar">
+      <div style="display: flex; align-items: center;">
+        <button class="mobile-toggle" aria-label="Toggle navigation menu">
+          <i class="bi bi-list"></i>
+        </button>
+        <div class="topbar-title">
+          <h2>Student Portal Overview</h2>
+          <p>Welcome, <%= user.fullName %> (<%= user.regNo || 'VFSTR Student' %>)</p>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <a href="/student/notifications" class="notif-bell" title="Notifications">
+          <i class="bi bi-bell"></i>
+          <% if (typeof unreadCount !== 'undefined' && unreadCount > 0) { %>
+            <span class="notif-badge"><%= unreadCount %></span>
+          <% } %>
+        </a>
+        <a href="/student/submit-complaint" class="btn btn-primary btn-sm">
+          <i class="bi bi-plus-lg"></i> Lodge Grievance
+        </a>
+      </div>
+    </header>
+
+    <main class="dashboard-content">
+      <%- include('../partials/alerts') %>
+
+      <!-- Dynamic MongoDB Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon primary">
+            <i class="bi bi-journal-text"></i>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value"><%= stats.total %></div>
+            <div class="stat-label">Total Lodged</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon warning">
+            <i class="bi bi-clock-history"></i>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value"><%= stats.pending %></div>
+            <div class="stat-label">Pending Review</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon info">
+            <i class="bi bi-gear-wide-connected"></i>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value"><%= stats.inProgress %></div>
+            <div class="stat-label">In Progress</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon success">
+            <i class="bi bi-check-circle"></i>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value"><%= stats.resolved %></div>
+            <div class="stat-label">Resolved / Closed</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Action Banner -->
+      <div style="background: linear-gradient(135deg, #1e3a8a, #2563eb); color: #ffffff; padding: 1.75rem 2rem; border-radius: var(--radius-lg); margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
+        <div>
+          <h3 style="color: #ffffff; font-size: 1.35rem; margin-bottom: 0.35rem;">Have an issue on campus?</h3>
+          <p style="color: #cbd5e1; font-size: 0.95rem; margin: 0;">Submit academic, hostel, lab, maintenance, or transportation concerns directly to campus authorities.</p>
+        </div>
+        <a href="/student/submit-complaint" class="btn btn-lg" style="background-color: #38bdf8; color: #0f172a; font-weight: 700;">
+          <i class="bi bi-pencil-square"></i> Submit New Grievance
+        </a>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 2fr 1.2fr; gap: 1.75rem;">
+        <!-- Recent Complaints Table -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="bi bi-card-checklist" style="color: var(--primary);"></i> Recent Grievances</h3>
+            <a href="/student/complaints" class="btn btn-outline btn-sm">View All</a>
+          </div>
+          <div class="card-body" style="padding: 0;">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Title & Category</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (recentComplaints && recentComplaints.length > 0) { %>
+                    <% recentComplaints.forEach(complaint => { %>
+                      <tr>
+                        <td>
+                          <strong><%= complaint.complaintId %></strong>
+                        </td>
+                        <td>
+                          <div style="font-weight: 600; color: var(--text-main);"><%= complaint.title %></div>
+                          <span style="font-size: 0.775rem; color: var(--text-muted);"><%= complaint.category %></span>
+                        </td>
+                        <td>
+                          <%- include('../partials/statusBadge', { status: complaint.status }) %>
+                        </td>
+                        <td style="font-size: 0.85rem; color: var(--text-muted);">
+                          <%= new Date(complaint.createdAt).toLocaleDateString() %>
+                        </td>
+                        <td>
+                          <a href="/student/complaint/<%= complaint._id %>" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-eye"></i> Details
+                          </a>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  <% } else { %>
+                    <tr>
+                      <td colspan="5" style="text-align: center; padding: 2.5rem 1rem; color: var(--text-muted);">
+                        <i class="bi bi-inbox" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+                        You have not submitted any grievances yet.
+                      </td>
+                    </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Notifications Panel -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="bi bi-bell" style="color: var(--warning);"></i> Recent Alerts</h3>
+            <a href="/student/notifications" class="btn btn-outline btn-sm">All</a>
+          </div>
+          <div class="card-body" style="padding: 1.25rem;">
+            <% if (recentNotifications && recentNotifications.length > 0) { %>
+              <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+                <% recentNotifications.forEach(notif => { %>
+                  <div style="padding: 0.85rem; border-radius: var(--radius-md); background-color: <%= notif.isRead ? '#f8fafc' : 'var(--primary-light)' %>; border-left: 3px solid <%= notif.isRead ? '#cbd5e1' : 'var(--primary)' %>;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                      <strong style="font-size: 0.875rem; color: var(--text-main);"><%= notif.title %></strong>
+                      <span style="font-size: 0.75rem; color: var(--text-muted);"><%= new Date(notif.createdAt).toLocaleDateString() %></span>
+                    </div>
+                    <p style="font-size: 0.825rem; color: var(--text-muted); margin: 0; line-height: 1.4;"><%= notif.message %></p>
+                  </div>
+                <% }) %>
+              </div>
+            <% } else { %>
+              <div style="text-align: center; padding: 2rem 1rem; color: var(--text-muted);">
+                <i class="bi bi-check2-circle" style="font-size: 2rem; display: block; margin-bottom: 0.5rem; color: var(--success);"></i>
+                You are all caught up! No alerts.
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<%- include('../partials/footer', { isDashboard: true }) %>
+
